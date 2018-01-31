@@ -9,7 +9,7 @@ class NewickTree(object):
         self.root = None
         self.node_dict = {}
 
-    def add_node(self, node_name, parent_name):
+    def add_node(self, parent_name, node_name):
         # First input as root
         if not self.root:
             if node_name == parent_name:
@@ -18,23 +18,38 @@ class NewickTree(object):
             newnode = NewickNode(parent_name, None)
             self.root = newnode
             self.node_dict[parent_name] = newnode
-            newchild = newnode.add_child(node_name, newnode)
+            newchild = newnode.add_child(node_name)
             self.node_dict[node_name] = newchild
+            return
         if parent_name not in self.node_dict and self.root:
             print("Node_Parent %s not in the tree" %parent_name)
             return
         if node_name in self.node_dict:
-            print("Node %s already in the tree" % name)
+            print("Node %s already in the tree" % node_name)
             return
-        parent_node = node_dict[parent_name]
-        childnode = NewickNode(node_name, parent_node)
+        parent_node = self.node_dict[parent_name]
+        childnode = parent_node.add_child(node_name)
+        self.node_dict[node_name] = childnode
 
     def print_tree(self):
         """Print tree"""
         cur_node = self.root
-        line = []
+        if not cur_node:
+            print("Empty Tree")
+        content = []
+        children_content = self.print_children(cur_node)
+        print(children_content)
 
-
+    def print_children(self, cur_node):
+        cur_children = cur_node.child_list
+        if not cur_children:
+            return cur_node.name
+        children_content = []
+        for child in cur_children:
+            children_content.append(self.print_children(child))
+        children_content = ",".join(children_content)
+        children_content = "(%s)%s" %(children_content, cur_node.name)
+        return children_content
 
 class NewickNode(object):
     """Node of Newick Tree"""
@@ -83,6 +98,18 @@ def mendel(infile: str) -> None:
         prob = 1 - prob_res
         print (prob)
 
+def test_build_print_newicktree(infile):
+    """Test to build and print newick tree."""
+    with open(infile) as filep:
+        n_tree = NewickTree()
+        for line in filep:
+            entry = line.split()
+            if not entry:
+                continue
+            n_tree.add_node(entry[0], entry[1])
+            n_tree.print_tree()
+        n_tree.print_tree()
+
 def main():
     """Main func for Rosland"""
     args = sys.argv[1:]
@@ -93,8 +120,8 @@ def main():
     prefix = args[1]
     # dna2rna(infile)
     # rc_seq(infile)
-    mendel(infile)
-
+    # mendel(infile)
+    test_build_print_newicktree(infile)
 
 if __name__ == '__main__':
     main()
