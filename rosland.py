@@ -2,6 +2,7 @@
 #!/usr/bin/python3
 import sys
 import re
+import argparse
 
 class NewickTree(object):
     """Newick Tree."""
@@ -63,65 +64,35 @@ class NewickNode(object):
         self.child_list.append(new_child)
         return new_child
 
-
-def dna2rna(infile: str):
-    """Translates dna to rna"""
-    with open(infile) as filep:
-        dna = filep.read()
-        rna = re.sub("T", "U", dna)
-        print(rna)
-def rc_seq(infile: str):
-    """Translates dna to rna"""
-    nt_dict = {
-        "A": "T",
-        "T": "A",
-        "C": "G",
-        "G": "C"
-    }
-    with open(infile) as filep:
-        dna = filep.read()
-        rc_seq = []
-        for nt in dna[::-1]:
-            if nt in nt_dict:
-                rc_seq.append(nt_dict[nt])
-        print("".join(rc_seq))
-
-def mendel(infile: str) -> None:
-    with open(infile) as filep:
-        counts = filep.readline()
-        nums = [int(cnt) for cnt in counts.split()]
-        homo_d = nums[0]
-        homo_r = nums[1]
-        hyb = nums[2]
-        total = homo_d + homo_r + hyb
-        prob_res = (1/4*hyb*(hyb-1) + hyb*homo_r + homo_r*(homo_r-1))/(total*(total -1))
-        prob = 1 - prob_res
-        print (prob)
-
 def test_build_print_newicktree(infile):
     """Test to build and print newick tree."""
-    with open(infile) as filep:
-        n_tree = NewickTree()
-        for line in filep:
-            entry = line.split()
-            if not entry:
-                continue
-            n_tree.add_node(entry[0], entry[1])
-            n_tree.print_tree()
+    n_tree = NewickTree()
+    for line in infile:
+        entry = line.split()
+        if not entry:
+            continue
+        n_tree.add_node(entry[0], entry[1])
         n_tree.print_tree()
+    n_tree.print_tree()
 
-def main():
+def main(infile):
     """Main func for Rosland"""
-    args = sys.argv[1:]
-    if len(args) != 2:
-        print("%s [input_file] [output_prefix]" %sys.argv[0])
-        return
-    infile = args[0]
-    prefix = args[1]
-    # dna2rna(infile)
-    # rc_seq(infile)
-    # mendel(infile)
+#    infile = sys.stdin
+#    if len(sys.argv)>1:
+#        if len(args) != 2:
+#            print("%s [optional_input_file]" %sys.argv[0], file=sys.stderr)
+#            return
+#        else:
+#            infile = open(sys.argv[1])
     test_build_print_newicktree(infile)
 
+
 if __name__ == '__main__':
-    main()
+    #main()    
+    parser = argparse.ArgumentParser(description='problem 2a',
+             prog='rosland.py')
+    parser.add_argument('infile', nargs='?', type=argparse.FileType('r'),
+                        default=sys.stdin)
+    args = parser.parse_args()
+    main(args.infile)
+    
