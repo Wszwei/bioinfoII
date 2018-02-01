@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/python3
 import sys
-import re
 import argparse
 
 class NewickTree(object):
@@ -37,7 +36,6 @@ class NewickTree(object):
         cur_node = self.root
         if not cur_node:
             print("Empty Tree")
-        content = []
         children_content = self.print_children(cur_node)
         print(children_content)
 
