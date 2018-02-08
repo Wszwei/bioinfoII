@@ -194,9 +194,12 @@ def main(infile):
 
 if __name__ == '__main__':
     #main()
-    parser = argparse.ArgumentParser(description='problem 2a',
-             prog='rosland.py')
+    parser = argparse.ArgumentParser(description='Input must be of format \
+                                      <newick_tree>; <int>,<int>. For example, \
+                                      ((((6)5)2,(4,7)3)1)0; 3,6',
+                                     prog='problem2.B.py')
     parser.add_argument('infile', nargs='?', type=argparse.FileType('r'),
-                        default=sys.stdin)
+                        default=sys.stdin, help='Either enter a filename or \
+                        enter input via stdin (default)')
     args = parser.parse_args()
     main(args.infile)
