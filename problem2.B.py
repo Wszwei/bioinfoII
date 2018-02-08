@@ -13,7 +13,7 @@ class NewickTree(object):
         # First input as root
         if not self.root:
             if node_name == parent_name:
-                print("Cannot have duplicated node as %s" %node)
+                print("Cannot have duplicated node as %s" %node, file=sys.stderr)
                 return
             newnode = NewickNode(parent_name, None)
             self.root = newnode
@@ -22,10 +22,10 @@ class NewickTree(object):
             self.node_dict[node_name] = newchild
             return
         if parent_name not in self.node_dict and self.root:
-            print("Node_Parent %s not in the tree" %parent_name)
+            print("Node_Parent %s not in the tree" %parent_name, file=sys.stderr)
             return
         if node_name in self.node_dict:
-            print("Node %s already in the tree" % node_name)
+            print("Node %s already in the tree" % node_name, file=sys.stderr)
             return
         parent_node = self.node_dict[parent_name]
         childnode = parent_node.add_child(node_name)
@@ -33,7 +33,7 @@ class NewickTree(object):
 
     def add_raw_node(self, parent_name, node_name):
         if node_name == parent_name:
-            print("Cannot have duplicated node as %s" %node)
+            print("Cannot have duplicated node as %s" %node, file=sys.stderr)
             return
         if parent_name not in self.node_dict:
             newnode = NewickNode(parent_name, None)
@@ -42,8 +42,9 @@ class NewickTree(object):
             newnode = NewickNode(node_name, None)
             self.node_dict[node_name] = newnode
         if self.node_dict[node_name].parent:
-            print ("Node %s cannot be assigned to both %s and %s" %(
-                node_name, parent_name, self.node_dict[node_name].parent.name))
+            print("Node %s cannot be assigned to both %s and %s" % (
+            node_name, parent_name, self.node_dict[node_name].parent.name), 
+            file=sys.stderr)
             return
         self.node_dict[parent_name].child_list.append(self.node_dict[node_name])
         self.node_dict[node_name].parent = self.node_dict[parent_name]
@@ -52,7 +53,7 @@ class NewickTree(object):
         """Print tree"""
         cur_node = self.root
         if not cur_node:
-            print("Empty Tree")
+            print("Empty Tree", file=sys.stderr)
         children_content = self.print_children(cur_node)
         print(children_content)
 
@@ -102,11 +103,11 @@ class NewickTree(object):
         try:
             assert nodename_a in self.node_dict
         except:
-            print("%s is not in the tree" %nodename_a)
+            print("%s is not in the tree" %nodename_a, file=sys.stderr)
         try:
             assert nodename_b in self.node_dict
         except:
-            print("%s is not in the tree" %nodename_b)
+            print("%s is not in the tree" %nodename_b, file=sys.stderr)
 
         node_a = self.node_dict[nodename_a]
         node_b = self.node_dict[nodename_b]
@@ -165,22 +166,26 @@ def build_print_newicktree(infile):
 
 def dist_newicktree(infile):
     """Load Newick Tree in parentheses format."""
-    entry = infile.read().split(":")
-    if len(entry) != 2:
-        print("Wrong input format")
-        return
-    raw_tree = entry[0]
-    nodes = entry[1].split(",")
-    if len(nodes) != 2:
-        print("Require Two Nodes to calculate distance")
-        return
-    node_a = nodes[0].strip()
-    node_b = nodes[1].strip()
-
-
-    n_tree = NewickTree()
-    n_tree.load_tree(raw_tree)
-    print(n_tree.get_distance(node_a, node_b))
+    count = 0
+    for line in infile:
+        count = count + 1
+        entry = line.strip().split(";")
+        if len(entry) != 2:
+            print("Wrong input format. Line %i skipped." % count, \
+                  file=sys.stderr)
+            continue
+        raw_tree = entry[0]
+        nodes = entry[1].strip().split(",")
+        if len(nodes) != 2 or nodes[0] == '' or nodes[1] == '':
+            print("Requires two nodes to calculate distance. Line %i skipped." \
+                  % count, file=sys.stderr)
+            continue
+        node_a = nodes[0].strip()
+        node_b = nodes[1].strip()
+    
+        n_tree = NewickTree()
+        n_tree.load_tree(raw_tree)
+        print(n_tree.get_distance(node_a, node_b))
 
 
 def main(infile):
