@@ -13,7 +13,7 @@ class NewickTree(object):
         # First input as root
         if not self.root:
             if node_name == parent_name:
-                print("Cannot have duplicated node as %s" %node, file=sys.stderr)
+                print("Cannot have duplicated parent node", file=sys.stderr)
                 return
             newnode = NewickNode(parent_name, None)
             self.root = newnode
@@ -33,7 +33,7 @@ class NewickTree(object):
 
     def add_raw_node(self, parent_name, node_name):
         if node_name == parent_name:
-            print("Cannot have duplicated node as %s" %node, file=sys.stderr)
+            print("Cannot have duplicated parent node", file=sys.stderr)
             return
         if parent_name not in self.node_dict:
             newnode = NewickNode(parent_name, None)
